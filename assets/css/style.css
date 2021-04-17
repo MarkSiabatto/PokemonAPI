@@ -1,0 +1,37 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Zen Dots', cursive;
+}
+.header{
+    width: 100%;
+    z-index: 1;
+}
+.headerStyle{
+    color: azure;
+    height: 5rem;
+    padding-bottom: 2rem;
+}
+.headerTitle{
+    padding-top: 1rem;
+}
+.center{
+    align-items: center;
+    margin-left: 5rem;
+}
+.characterData{
+    margin-top: 10rem;
+    margin-bottom: 5rem;
+}
+.cardStyle{
+    background-color: grey;
+    border: solid black;
+    border-radius: 10px;
+}
+.pagination{
+    margin-top: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    align-items: center;
+}
