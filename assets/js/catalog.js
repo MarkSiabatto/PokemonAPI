@@ -12,6 +12,28 @@ class CatalogApp {
         await this.loadPokemons();
     }
 
+    createPokemonCard(pokemon) {
+        return `
+            <div class="pokemon-card">
+                <div class="pokemon-card-image">
+                    <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+                </div>
+                <div class="pokemon-card-info">
+                    <h3 class="pokemon-card-name">${pokemon.name}</h3>
+                    <div class="pokemon-card-details">
+                        <p><strong>Height:</strong> ${pokemon.height/10}m</p>
+                        <p><strong>Weight:</strong> ${pokemon.weight/10}kg</p>
+                        <div class="pokemon-types">
+                            ${pokemon.types.map(type => 
+                                `<span class="type ${type.type.name}">${type.type.name}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     // ... copy loadPokemons and related methods from PokemonApp ...
 }
 
