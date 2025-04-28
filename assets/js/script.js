@@ -6,13 +6,13 @@ const CONFIG = {
     MAX_POKEMON: 898
 };
 
-// Virtual Keyboard Configuration
-const KEYBOARD_LAYOUT = [
-    '1234567890',
-    'QWERTYUIOP',
-    'ASDFGHJKL',
-    'ZXCVBNM'
-];
+// Updated Virtual Keyboard Configuration
+const KEYBOARD_LAYOUT = {
+    numbers: '1234567890',
+    firstRow: 'QWERTYUIOP',
+    secondRow: 'ASDFGHJKL',
+    thirdRow: 'ZXCVBNM'
+};
 
 // Pokemon Service Class
 class PokemonService {
@@ -71,19 +71,22 @@ class VirtualKeyboard {
     }
 
     render() {
-        KEYBOARD_LAYOUT.forEach(row => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'keyboard-row';
-            
-            [...row].forEach(key => {
-                const keyButton = document.createElement('button');
-                keyButton.className = 'key';
-                keyButton.textContent = key;
-                keyButton.addEventListener('click', () => this.onKeyPress(key));
-                rowDiv.appendChild(keyButton);
-            });
-            
-            this.container.appendChild(rowDiv);
+        // Render number row
+        this.renderRow('number-row', KEYBOARD_LAYOUT.numbers);
+        // Render letter rows
+        this.renderRow('first-row', KEYBOARD_LAYOUT.firstRow);
+        this.renderRow('second-row', KEYBOARD_LAYOUT.secondRow);
+        this.renderRow('third-row', KEYBOARD_LAYOUT.thirdRow);
+    }
+
+    renderRow(rowId, keys) {
+        const row = document.getElementById(rowId);
+        [...keys].forEach(key => {
+            const keyButton = document.createElement('button');
+            keyButton.className = 'key';
+            keyButton.textContent = key;
+            keyButton.addEventListener('click', () => this.onKeyPress(key));
+            row.appendChild(keyButton);
         });
     }
 }
@@ -128,32 +131,38 @@ class PokemonUI {
     }
 
     displayPokemon(pokemon) {
-        const html = `
-            <div class="pokemon-image">
-                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="main-sprite">
-                <img src="${pokemon.sprites.front_shiny}" alt="${pokemon.name} shiny" class="shiny-sprite">
-            </div>
-            <div class="pokemon-info">
-                <h2 class="pokemon-name">${pokemon.name.toUpperCase()}</h2>
-                <p>Height: ${pokemon.height / 10}m</p>
-                <p>Weight: ${pokemon.weight / 10}kg</p>
+        const mainImage = document.getElementById('pokemon-image');
+        const shinyImage = document.getElementById('pokemon-shiny');
+        const infoContainer = document.getElementById('pokemon-info');
+
+        mainImage.src = pokemon.sprites.front_default;
+        mainImage.alt = pokemon.name;
+        shinyImage.src = pokemon.sprites.front_shiny;
+        shinyImage.alt = `${pokemon.name} shiny`;
+
+        infoContainer.innerHTML = `
+            <h2 class="pokemon-name">${pokemon.name.toUpperCase()}</h2>
+            <div class="pokemon-details">
+                <p><strong>Height:</strong> ${pokemon.height / 10}m</p>
+                <p><strong>Weight:</strong> ${pokemon.weight / 10}kg</p>
                 <div class="pokemon-types">
                     ${pokemon.types.map(type => 
                         `<span class="type ${type.type.name}">${type.type.name}</span>`
                     ).join('')}
                 </div>
-                <div class="pokemon-stats">
-                    ${pokemon.stats.map(stat => 
-                        `<div class="stat">
-                            <span>${stat.stat.name}: ${stat.base_stat}</span>
+            </div>
+            <div class="pokemon-stats">
+                ${pokemon.stats.map(stat => `
+                    <div class="stat-row">
+                        <span class="stat-name">${stat.stat.name}</span>
+                        <div class="stat-bar-container">
                             <div class="stat-bar" style="width: ${stat.base_stat}%"></div>
-                        </div>`
-                    ).join('')}
-                </div>
+                            <span class="stat-value">${stat.base_stat}</span>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `;
-        
-        this.pokemonDisplay.innerHTML = html;
     }
 
     showError(message) {

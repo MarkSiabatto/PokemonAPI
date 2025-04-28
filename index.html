@@ -21,8 +21,15 @@
                 </div>
                 <div class="main-screen">
                     <div id="pokemon-display" class="pokemon-display">
-                        <div class="pokemon-image"></div>
-                        <div class="pokemon-info"></div>
+                        <div class="pokemon-image-container">
+                            <img id="pokemon-image" class="pokemon-sprite" src="" alt="">
+                            <img id="pokemon-shiny" class="pokemon-sprite shiny" src="" alt="">
+                        </div>
+                        <div class="pokemon-info-container">
+                            <div class="info-box">
+                                <div id="pokemon-info" class="info-content"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -35,7 +42,12 @@
                 </div>
                 
                 <!-- Virtual Keyboard -->
-                <div id="virtual-keyboard" class="virtual-keyboard"></div>
+                <div id="virtual-keyboard" class="virtual-keyboard">
+                    <div class="keyboard-row" id="number-row"></div>
+                    <div class="keyboard-row" id="first-row"></div>
+                    <div class="keyboard-row" id="second-row"></div>
+                    <div class="keyboard-row" id="third-row"></div>
+                </div>
             </div>
         </div>
 
@@ -48,6 +60,13 @@
             </div>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Created by MSR</p>
+            <a href="catalog.html" class="catalog-link">View Pokemon Catalog</a>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./assets/js/script.js"></script>
