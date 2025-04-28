@@ -2,8 +2,17 @@
 const CONFIG = {
     BASE_URL: 'https://pokeapi.co/api/v2/pokemon',
     LIMIT: 30,
-    OFFSET: 0
+    OFFSET: 0,
+    MAX_POKEMON: 898
 };
+
+// Virtual Keyboard Configuration
+const KEYBOARD_LAYOUT = [
+    '1234567890',
+    'QWERTYUIOP',
+    'ASDFGHJKL',
+    'ZXCVBNM'
+];
 
 // Pokemon Service Class
 class PokemonService {
@@ -26,13 +35,133 @@ class PokemonService {
             throw error;
         }
     }
+
+    static async fetchRandomPokemon() {
+        const randomId = Math.floor(Math.random() * CONFIG.MAX_POKEMON) + 1;
+        return await this.fetchPokemonById(randomId);
+    }
+
+    static async fetchPokemonById(id) {
+        try {
+            const response = await fetch(`${CONFIG.BASE_URL}/${id}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching Pokemon:', error);
+            throw error;
+        }
+    }
+
+    static async searchPokemon(query) {
+        try {
+            const response = await fetch(`${CONFIG.BASE_URL}/${query.toLowerCase()}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error searching Pokemon:', error);
+            throw error;
+        }
+    }
 }
 
 // UI Component Class
+class VirtualKeyboard {
+    constructor(container, onKeyPress) {
+        this.container = container;
+        this.onKeyPress = onKeyPress;
+        this.render();
+    }
+
+    render() {
+        KEYBOARD_LAYOUT.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'keyboard-row';
+            
+            [...row].forEach(key => {
+                const keyButton = document.createElement('button');
+                keyButton.className = 'key';
+                keyButton.textContent = key;
+                keyButton.addEventListener('click', () => this.onKeyPress(key));
+                rowDiv.appendChild(keyButton);
+            });
+            
+            this.container.appendChild(rowDiv);
+        });
+    }
+}
+
 class PokemonUI {
     constructor() {
         this.characterContainer = document.getElementById('characterData');
         this.paginationContainer = document.getElementById('pagination');
+        this.pokemonDisplay = document.getElementById('pokemon-display');
+        this.searchInput = document.getElementById('pokemon-search');
+        this.searchButton = document.getElementById('search-btn');
+        this.virtualKeyboard = new VirtualKeyboard(
+            document.getElementById('virtual-keyboard'),
+            this.handleVirtualKeyPress.bind(this)
+        );
+        
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.searchButton.addEventListener('click', () => this.handleSearch());
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSearch();
+        });
+    }
+
+    handleVirtualKeyPress(key) {
+        this.searchInput.value += key;
+        this.searchInput.focus();
+    }
+
+    async handleSearch() {
+        const query = this.searchInput.value.trim();
+        if (!query) return;
+
+        try {
+            const pokemon = await PokemonService.searchPokemon(query);
+            this.displayPokemon(pokemon);
+        } catch (error) {
+            this.showError('Pokemon not found!');
+        }
+    }
+
+    displayPokemon(pokemon) {
+        const html = `
+            <div class="pokemon-image">
+                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="main-sprite">
+                <img src="${pokemon.sprites.front_shiny}" alt="${pokemon.name} shiny" class="shiny-sprite">
+            </div>
+            <div class="pokemon-info">
+                <h2 class="pokemon-name">${pokemon.name.toUpperCase()}</h2>
+                <p>Height: ${pokemon.height / 10}m</p>
+                <p>Weight: ${pokemon.weight / 10}kg</p>
+                <div class="pokemon-types">
+                    ${pokemon.types.map(type => 
+                        `<span class="type ${type.type.name}">${type.type.name}</span>`
+                    ).join('')}
+                </div>
+                <div class="pokemon-stats">
+                    ${pokemon.stats.map(stat => 
+                        `<div class="stat">
+                            <span>${stat.stat.name}: ${stat.base_stat}</span>
+                            <div class="stat-bar" style="width: ${stat.base_stat}%"></div>
+                        </div>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+        
+        this.pokemonDisplay.innerHTML = html;
+    }
+
+    showError(message) {
+        this.pokemonDisplay.innerHTML = `
+            <div class="error-message">
+                <p>${message}</p>
+            </div>
+        `;
     }
 
     createPokemonCard(pokemon) {
@@ -92,6 +221,15 @@ class PokemonApp {
     }
 
     async init() {
+        // Load random Pokemon on startup
+        try {
+            const randomPokemon = await PokemonService.fetchRandomPokemon();
+            this.ui.displayPokemon(randomPokemon);
+        } catch (error) {
+            this.ui.showError('Failed to load random Pokemon');
+        }
+
+        // Load catalog
         await this.loadPokemons();
         this.setupEventListeners();
     }
